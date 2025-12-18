@@ -3,7 +3,14 @@ import time
 import random
 from simpleai.search import SearchProblem, simulated_annealing
 
+def knapsack_fitness(state, weights, values, capacity, penalty=10):
+    total_weight = sum(w * s for w, s in zip(weights, state))
+    total_value = sum(v * s for v, s in zip(values, state))
 
+    if total_weight > capacity:
+        total_value -= (total_weight - capacity) * penalty
+
+    return total_value, total_weight
 
 class KnapsackProblem(SearchProblem):
    def __init__(self, weights, values, capacity):
@@ -48,8 +55,11 @@ def run_SA(weights, values, capacity, iterations_limit=5000):
 
 
    best_state = result.state
-   total_weight = sum(w * s for w, s in zip(weights, best_state))
-   total_value = sum(v * s for v, s in zip(values, best_state))
+   total_value, total_weight = knapsack_fitness(
+        best_state, weights, values, capacity
+    )
+#    total_weight = sum(w * s for w, s in zip(weights, best_state))
+#    total_value = sum(v * s for v, s in zip(values, best_state))
   
    return best_state, total_value, total_weight, elapsed, iterations_limit
 
@@ -59,13 +69,17 @@ def run_BCO(weights, values, capacity, num_bees=30, num_iterations=200):
    n = len(weights)
    population = np.random.randint(0, 2, (num_bees, n))
 
-
    def fitness(state):
-       w = np.sum(np.array(weights) * state)
-       v = np.sum(np.array(values) * state)
-       if w > capacity:
-           v -= (w - capacity) * 10
-       return v
+        v, _ = knapsack_fitness(state, weights, values, capacity)
+        return v
+
+
+#    def fitness(state):
+#        w = np.sum(np.array(weights) * state)
+#        v = np.sum(np.array(values) * state)
+#        if w > capacity:
+#            v -= (w - capacity) * 10
+#        return v
 
 
    best_solution = population[0].copy()
@@ -98,7 +112,10 @@ def run_BCO(weights, values, capacity, num_bees=30, num_iterations=200):
 
 
    elapsed = time.time() - start_time
-   total_weight = np.sum(np.array(weights) * best_solution)
+   _, total_weight = knapsack_fitness(
+        best_solution, weights, values, capacity
+    )
+#    total_weight = np.sum(np.array(weights) * best_solution)
   
    complexity = num_bees * num_iterations
    return tuple(best_solution), best_fitness, total_weight, elapsed, complexity
@@ -109,13 +126,17 @@ def run_GA(weights, values, capacity, pop_size=30, generations=100, mutation_rat
    n = len(weights)
    population = np.random.randint(0, 2, (pop_size, n))
 
-
    def fitness(state):
-       w = np.sum(np.array(weights) * state)
-       v = np.sum(np.array(values) * state)
-       if w > capacity:
-           v -= (w - capacity) * 10
-       return v
+        v, _ = knapsack_fitness(state, weights, values, capacity)
+        return v
+
+
+#    def fitness(state):
+#        w = np.sum(np.array(weights) * state)
+#        v = np.sum(np.array(values) * state)
+#        if w > capacity:
+#            v -= (w - capacity) * 10
+#        return v
 
 
    best_solution = population[0].copy()
@@ -151,7 +172,10 @@ def run_GA(weights, values, capacity, pop_size=30, generations=100, mutation_rat
 
 
    elapsed = time.time() - start_time
-   total_weight = np.sum(np.array(weights) * best_solution)
+   _, total_weight = knapsack_fitness(
+        best_solution, weights, values, capacity
+    )
+#    total_weight = np.sum(np.array(weights) * best_solution)
   
    complexity = generations * pop_size
    return tuple(best_solution), best_fitness, total_weight, elapsed, complexity
