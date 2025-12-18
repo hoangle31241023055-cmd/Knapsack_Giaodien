@@ -408,7 +408,13 @@ class KnapsackGUI(QMainWindow):
        self.results_display.append(f"{state}")
        self.results_display.append("\nCác vật phẩm được chọn:")
        self.results_display.append("-" * 30)
-       selected_items = [f"Vật {i+1}: TL={self.weights[i]:.2f}, GT={self.values[i]:.2f}" for i, selected in enumerate(state) if selected]
+       selected_items = []
+       for i, selected in enumerate(state):
+           if selected:
+               selected_items.append(
+                   f"✔ Vật {i+1}: TL={self.weights[i]:.2f}, GT={self.values[i]:.2f}"
+                )
+    #    selected_items = [f"Vật {i+1}: TL={self.weights[i]:.2f}, GT={self.values[i]:.2f}" for i, selected in enumerate(state) if selected]
        if selected_items:
            self.results_display.append("\n".join(f"• {item}" for item in selected_items))
        else:
